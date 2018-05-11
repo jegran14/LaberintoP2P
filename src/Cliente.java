@@ -36,7 +36,7 @@ public class Cliente {
         int Puerto2 = Integer.parseInt(args[1]);
 
         try{
-            System.out.println("Se ha iniciado la aplicación");
+            System.out.println("Se ha iniciado la aplicacion");
             s2 = new Socket(IP2, Puerto2);
 
             leer = new BufferedReader(new InputStreamReader(s2.getInputStream()));
@@ -57,16 +57,17 @@ public class Cliente {
         }
         catch (IOException err){
             conectado1 = false ;
-            s1 = new ServerSocket(Puerto1);
-            s2 = s1.accept();
+
         }
 
         try{
+            s1 = new ServerSocket(Puerto1);
+            s1.accept();
             System.out.println("Se ha conectado el otro cliente");
             conectado2 = true;
 
             if(conectado2 && !conectado1){
-                //s2 = new Socket(IP2, Puerto2);
+                s2 = new Socket(IP2, Puerto2);
                 System.out.println("La conexion con el otro cliente se ha realizado correctamente");
 
                 leer = new BufferedReader(new InputStreamReader(s2.getInputStream()));

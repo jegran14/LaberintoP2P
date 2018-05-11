@@ -20,6 +20,8 @@ public class Cliente {
     private static int aciertos;
     private static int fallos;
 
+    private static int ganador;
+
     public static void main(String[] args) throws UnknownHostException, IOException{
         ServerSocket s1;
         boolean conectado1 = false;
@@ -41,8 +43,9 @@ public class Cliente {
             enviar = new PrintWriter(s2.getOutputStream());
 
             tabAsignadoJ2 = rdm.nextInt(2);
-            System.out.println(tabAsignadoJ2);
+
             posJ2 = tableros[tabAsignadoJ2].getStart();
+            tabJ2[posJ2.x][posJ2.y] = tableros[tabAsignadoJ2].getValue(posJ2.x, posJ2.y);
 
             System.out.println("La conexion se ha realizado con exito");
             conectado1 = true;
@@ -70,11 +73,22 @@ public class Cliente {
                 enviar = new PrintWriter(s2.getOutputStream());
 
                 tabAsignadoJ2 = rdm.nextInt(2);
+
                 posJ2 = tableros[tabAsignadoJ2].getStart();
+                tabJ2[posJ2.x][posJ2.y] = tableros[tabAsignadoJ2].getValue(posJ2.x, posJ2.y);
             }
             else{
                 mostrarTableros();
-                darJugada();
+                while(darJugada()){
+                    if(hayGanador()) {
+                        ganador = 1;
+                        break;
+                    }
+                }
+                if(ganador != 1){
+                    enviar.println("FIN TURNO");
+                    enviar.flush();
+                }
             }
         }
         catch (UnknownHostException err){
@@ -84,32 +98,91 @@ public class Cliente {
             System.out.println("Error en la conexion: " + err);
         }
 
-        int ganador = 0;
         while (ganador == 0){
             String msg = leer.readLine();
-
-            if(msg.equals("JUGAR")){
+            if(msg.equals("ACABA")){
+                break;
+            }
+            else if(msg.equals("JUGAR")){
                 System.out.println("\nEs tu turno haz tu jugada\n");
                 enviarJugada();
+            }
+            else if(msg.equals("FIN TURNO")){
+                System.out.println("\nEs el turno del contrincante, espera su jugada\n");
+                mostrarTableros();
+                while(darJugada()){
+                    if(hayGanador()){
+                        ganador = 1;
+                        break;
+                    }
+
+                }
+                if(ganador != 1){
+                    enviar.println("FIN TURNO");
+                    enviar.flush();
+                }
             }
             System.out.println(msg);
         }
 
+        System.out.println("\nFIN DE LA PARTIDA:");
+        if(ganador != 0){
+            System.out.println("Rsultados del contrincante: ");
+            System.out.println("Aciertos: " + aciertos + "\tFallos: " + fallos);
+            enviarResultados();
+
+            String msg = leer.readLine();
+            while (!msg.equals("RESULTADOS")){
+                System.out.println(msg);
+                msg = leer.readLine();
+            }
+
+            System.out.println("\nHAS PERDIDO");
+        }
+        else{
+            String msg = leer.readLine();
+            while (!msg.equals("RESULTADOS")){
+                System.out.println(msg);
+                msg = leer.readLine();
+            }
+
+            System.out.println("Rsultados del contrincante: ");
+            System.out.println("Aciertos: " + aciertos + "\tFallos: " + fallos);
+            enviarResultados();
+
+            System.out.println("\nHAS GANADO");
+        }
 
 
 
+    }
+
+    private static void enviarResultados(){
+        enviar.println("ACABA");
+        enviar.println("\nFIN DE LA PARTIDA:");
+        enviar.println("Tus resultados: ");
+        enviar.println("Aciertos: " + aciertos + "\tFallos: " + fallos);
+        enviar.println("RESULTADOS");
+        enviar.flush();
+    }
+
+    private static boolean hayGanador(){
+        Point endPos = tableros[tabAsignadoJ2].getEnd();
+        return endPos.x == posJ2.x && endPos.y == posJ2.y;
     }
 
     private static void enviarJugada(){
         try{
             System.out.println("Las coordenadas deben ir en la misma linea separadas por espacios\n");
             enviar.println(leerTerminal.readLine());
+            enviar.flush();
 
             String respuesta = leer.readLine();
             while(!respuesta.equals("ok")){
                 System.out.println(respuesta);
                 System.out.println("Las coordenadas deben ir en la misma linea separadas por espacios\n");
                 enviar.println(leerTerminal.readLine());
+                enviar.flush();
 
                 respuesta = leer.readLine();
             }
@@ -126,8 +199,8 @@ public class Cliente {
         boolean inputOk = false;
         Point newPos = new Point();
 
-//        enviar.println("Tu posicion es: " + (posJ2.x + 1) + ", " + (posJ2.y + 1));
-        enviar.println("JUEGA");
+        enviar.println("Tu posicion es: " + (posJ2.x+1) + ", " + (posJ2.y+1));
+        enviar.println("JUGAR");
         enviar.flush();
 
         while(!inputOk){
@@ -185,6 +258,13 @@ public class Cliente {
         int value = tableros[tabAsignadoJ2].getValue(newPos.x, newPos.y);
         tabJ2[newPos.x][newPos.y] = value;
 
+        if(value == 1) {
+            posJ2 = newPos;
+            aciertos++;
+        }
+        else
+            fallos++;
+
         enviar.println("ok");
         enviar.flush();
 
@@ -201,8 +281,8 @@ public class Cliente {
     }
 
     private static void mostrarTableros(){
-        System.out.println("____________________________TABLERO DEL CONTRINCANTE__________________________");
-        enviar.println("____________________________TU TABLERO__________________________");
+        System.out.println("____TABLERO DEL CONTRINCANTE_____");
+        enviar.println("______TU TABLERO____");
 
         for(int i = 0; i <= 7; i++)
         {
@@ -222,7 +302,7 @@ public class Cliente {
                     System.out.print("? ");
                     enviar.print("? ");
                 }
-                else if(i+1 == posJ2.x && j+1 == posJ2.y){
+                else if(i == posJ2.x && j == posJ2.y){
                     System.out.print("X ");
                     enviar.print("X ");
                 }
@@ -282,6 +362,8 @@ public class Cliente {
 
         public Tablero(int[][] t, Point start, Point end){
             this.tablero = t;
+            this.start = start;
+            this.end = end;
         }
 
         public int getValue(int x, int y){

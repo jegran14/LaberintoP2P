@@ -42,7 +42,7 @@ public class Cliente {
             leer = new BufferedReader(new InputStreamReader(s2.getInputStream()));
             enviar = new PrintWriter(s2.getOutputStream());
 
-            tabAsignadoJ2 = rdm.nextInt(2);
+            tabAsignadoJ2 = rdm.nextInt(tableros.length);
 
             posJ2 = tableros[tabAsignadoJ2].getStart();
             tabJ2[posJ2.x][posJ2.y] = tableros[tabAsignadoJ2].getValue(posJ2.x, posJ2.y);
@@ -72,7 +72,7 @@ public class Cliente {
                 leer = new BufferedReader(new InputStreamReader(s2.getInputStream()));
                 enviar = new PrintWriter(s2.getOutputStream());
 
-                tabAsignadoJ2 = rdm.nextInt(2);
+                tabAsignadoJ2 = rdm.nextInt(tableros.length);
 
                 posJ2 = tableros[tabAsignadoJ2].getStart();
                 tabJ2[posJ2.x][posJ2.y] = tableros[tabAsignadoJ2].getValue(posJ2.x, posJ2.y);
@@ -353,6 +353,24 @@ public class Cliente {
                             {1, 1, 1, 0, 0, 1, 0},
                             {0, 0, 1, 1, 1, 1, 0}};
         tableros[1] = new Tablero(tab, new Point(5, 0), new Point(0, 0));
+
+        tab = new int[][]{  {0, 1, 1, 1, 1, 1, 0},
+                            {0, 1, 0, 0, 0, 1, 0},
+                            {0, 1, 1, 1, 0, 1, 0},
+                            {0, 0, 0, 1, 0, 1, 1},
+                            {0, 1, 1, 1, 0, 0, 0},
+                            {0, 1, 0, 0, 0, 0, 0},
+                            {0, 1, 1, 1, 1, 1, 1}};
+        tableros[2] = new Tablero(tab, new Point(6, 6), new Point(3, 6));
+
+        tab = new int[][]{  {0, 0, 0, 1, 1, 1, 1},
+                            {0, 0, 0, 1, 0, 0, 1},
+                            {0, 0, 0, 1, 1, 0, 1},
+                            {0, 0, 0, 0, 1, 0, 1},
+                            {0, 0, 1, 1, 1, 0, 1},
+                            {0, 1, 1, 0, 0, 0, 0},
+                            {0, 1, 0, 0, 0, 0, 0}};
+        tableros[3] = new Tablero(tab, new Point(6, 1), new Point(4, 6));
     }
 
     public static class Tablero{
